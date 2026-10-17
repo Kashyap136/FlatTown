@@ -1,0 +1,55 @@
+# =============================================================================
+# FLAT TOWN — repository-level ignore rules
+# Only .env.example files are ever versioned; a populated .env must never be
+# committed. The per-project files in server/.gitignore and web/.gitignore
+# cover their own tooling.
+# =============================================================================
+
+# --------------------------------------------------------- secrets & config ---
+# Any populated environment file. `*.example` is the only versioned variant.
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# --------------------------------------------------------------- dependencies --
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+
+# ------------------------------------------------------------ build output ----
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# ------------------------------------------------- runtime / local artefacts --
+# Development-only media fallback. Never in MongoDB, never in version control.
+uploads/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+.nyc_output/
+
+# -------------------------------------------- test harness binaries/cache ----
+# mongodb-memory-server downloads a mongod binary into the project directory.
+mongodb-binaries/
+.cache/
+.tmp/
+tmp/
+
+# --------------------------------------------------------------- IDE / OS -----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# ------------------------------------------------------------- deployment -----
+.vercel
+.render

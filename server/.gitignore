@@ -1,0 +1,37 @@
+# =============================================================================
+# FLAT TOWN API — ignore rules
+# =============================================================================
+
+# --------------------------------------------------------- secrets & config ---
+# A populated .env must never be committed. .env.example is versioned.
+.env
+.env.*
+!.env.example
+
+# --------------------------------------------------------------- dependencies --
+node_modules/
+
+# ------------------------------------------------------------ build output ----
+dist/
+build/
+*.tsbuildinfo
+
+# ------------------------------------------- development media fallback ------
+# Used only when CLOUDINARY_URL is empty. Real deployments use Cloudinary.
+uploads/
+
+# ------------------------------------------------------- test harness cache ---
+# mongodb-memory-server caches the downloaded mongod binary here.
+mongodb-binaries/
+
+# ------------------------------------------------------------ misc & tooling --
+coverage/
+.nyc_output/
+*.log
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
