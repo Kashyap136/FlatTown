@@ -39,9 +39,9 @@ export interface PaymentVerificationResult {
   capturedAt: Date;
 }
 
-let razorpayInstance: Razorpay | null = null;
+let razorpayInstance: any = null;
 
-export const getRazorpay = (): Razorpay => {
+export const getRazorpay = (): any => {
   if (!hasLiveRazorpay()) {
     throw ApiError.internal('Razorpay is not configured. Set RAZORPAY_KEY and RAZORPAY_SECRET.');
   }

@@ -10,7 +10,7 @@ export const connectDatabase = async (): Promise<typeof mongoose> => {
     serverSelectionTimeoutMS: 8000,
     maxPoolSize: 20,
     autoIndex: !env.isProd,
-  });
+  } as mongoose.ConnectOptions);
   log.info(`connected to ${env.mongoUri.replace(/\/\/([^@]+)@/, '//***@')}`);
   return mongoose;
 };

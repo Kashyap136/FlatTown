@@ -116,7 +116,7 @@ export const uploadBuffer = async (
           });
         },
       );
-      stream.end(buffer);
+      (stream as NodeJS.WritableStream).end(buffer);
     });
   }
 

@@ -1,4 +1,5 @@
 import { createClient, type RedisClientType } from 'redis';
+import { setTimeout, clearTimeout } from 'node:timers';
 import { env } from '../config/env';
 import { createLogger } from '../utils/logger';
 
@@ -76,7 +77,7 @@ export const initRedis = async (): Promise<void> => {
   connectingPromise = (async () => {
     try {
       client = createClient({ url: env.redisUrl });
-      client.on('error', (err) => {
+      client.on('error', (err: Error) => {
         lastError = err.message;
         connected = false;
       });

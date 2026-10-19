@@ -829,6 +829,21 @@ used different names, which were silently ignored:
 
 ---
 
+### Known dependency audit findings (server)
+
+`npm audit` reports 4 high-severity findings, none of which can be resolved
+with a compatible, non-breaking update at the time of writing:
+
+| Package | Path | Issue | Resolution |
+| --- | --- | --- | --- |
+| `nodemailer` 6.9.x | direct runtime dep | Multiple SMTP injection / parsing DoS advisories (GHSA-*) | Fix requires `nodemailer@10.1.7+`, a major breaking change to the email API. Email sending still works on 6.9.x; the affected features are not exercised in the core booking/escrow flow. Upgrade deferred to a dedicated change with integration-test coverage. |
+| `braces` 3.0.3 | transitive via `nodemon` -> `chokidar` | Stack-exhaustion DoS on deeply nested patterns (GHSA-vfj7-8cjw-p6xm) | `braces` is already at its latest (3.0.3); the advisory has no patched release. It is a **dev-only** tool (file watcher for `npm run dev`) and is never installed in production's runtime graph when `NODE_ENV=production` — but it is still pulled in by `npm ci --include=dev` on Render for the build step. No safe fix; documented. |
+
+Running `npm audit fix --force` is **not** recommended: it downgrades
+`nodemon` to 1.14.x (which breaks the dev workflow) and jumps `nodemailer`
+to 10.x without code updates. Re-run `npm audit` periodically; revisit if a
+patched minor is published.
+
 ## 18. MongoDB Atlas setup
 
 Already covered in section 6; this is the deployment-specific checklist.

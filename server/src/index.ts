@@ -1,4 +1,5 @@
 import { createApp } from './app';
+import { setTimeout } from 'node:timers';
 import { connectDatabase, disconnectDatabase } from './config/db';
 import { assertProductionEnv, env, placeholderFlags } from './config/env';
 import { disconnectRedis, initRedis } from './config/redis';

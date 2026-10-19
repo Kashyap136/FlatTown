@@ -52,7 +52,7 @@ export const createApp = (): Application => {
       },
       credentials: true,
       exposedHeaders: ['X-FlatTown-Cache'],
-    }),
+    }) as express.RequestHandler,
   );
 
   app.use(compression());
