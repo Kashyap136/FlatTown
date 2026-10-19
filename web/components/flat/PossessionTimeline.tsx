@@ -77,7 +77,7 @@ export const PossessionTimeline = ({
                     ? 'border-emerald-600 bg-emerald-600 text-white'
                     : active
                       ? 'border-emerald-600 bg-white text-emerald-700'
-                      : 'border-slate-200 bg-white text-slate-400',
+                      : 'border-slate-200 bg-white text-slate-500',
                 )}
               >
                 {done ? <CheckCircle2 className="size-4" /> : <Icon className="size-4" />}

@@ -232,7 +232,7 @@ export const FilterDrawer = ({ localities = [] }: { localities?: string[] }) => 
             onValueChange={([value]) => state.patch({ builderRatingMin: value, page: 1 })}
             aria-label="Minimum builder rating"
           />
-          <div className="mt-1 flex justify-between text-[10px] text-slate-400">
+          <div className="mt-1 flex justify-between text-[10px] text-slate-500">
             <span>Any</span>
             <span>5.0</span>
           </div>
@@ -407,7 +407,7 @@ export const TierChips = () => {
             }`}
           >
             {option.label}
-            <span className={`ml-1.5 font-medium ${active ? 'text-emerald-100' : 'text-slate-400'}`}>
+            <span className={`ml-1.5 font-medium ${active ? 'text-emerald-100' : 'text-slate-500'}`}>
               {option.hint}
             </span>
           </button>

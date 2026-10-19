@@ -56,7 +56,7 @@ export const Pagination = ({
       <ol className="hidden items-center gap-1 sm:flex">
         {pages.map((entry, index) =>
           entry === 'gap' ? (
-            <li key={`gap-${index}`} className="px-1 text-xs text-slate-400">
+            <li key={`gap-${index}`} className="px-1 text-xs text-slate-500">
               …
             </li>
           ) : (

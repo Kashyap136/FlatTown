@@ -190,7 +190,7 @@ const BookingCard = ({
                     <Badge variant={doc.verified ? 'success' : 'warning'}>
                       {doc.verified ? 'Verified' : 'Awaiting review'}
                     </Badge>
-                    <span className="text-[11px] text-slate-400">{formatDate(doc.uploadedAt)}</span>
+                    <span className="text-[11px] text-slate-500">{formatDate(doc.uploadedAt)}</span>
                   </span>
                 </li>
               ))}

@@ -71,14 +71,35 @@ export interface Harness {
 let harness: Harness | null = null;
 let memoryServer: MongoMemoryServer | null = null;
 
-/** Boots the app once per test process. */
+/**
+ * Boots the app once per test process.
+ *
+ * When `scripts/test.mjs` is used it starts ONE MongoMemoryServer and exports
+ * its URI as `FLATTOWN_TEST_MONGO_URI`; every test file then reuses it. Node
+ * runs each test file in its own process, so without this the suite forked six
+ * mongod instances back to back, and the resulting process contention
+ * intermittently cancelled whole suites — a flaky red run that looked like a
+ * product regression but was only a slow fork.
+ *
+ * Falling back to a private server keeps each file runnable standalone
+ * (`node --test test/booking.test.ts`).
+ */
 export const startHarness = async (): Promise<Harness> => {
   if (harness) return harness;
 
   for (const [key, value] of Object.entries(TEST_ENV)) process.env[key] = value;
 
-  memoryServer = await MongoMemoryServer.create();
-  process.env.MONGO_URI = memoryServer.getUri('flattown_test');
+  const sharedUri = process.env.FLATTOWN_TEST_MONGO_URI;
+  if (sharedUri) {
+    process.env.MONGO_URI = sharedUri;
+  } else {
+    /**
+     * A generous startup timeout: mongodb-memory-server defaults to 10s, which
+     * a busy Windows machine can exceed.
+     */
+    memoryServer = await MongoMemoryServer.create({ timeout: 120_000 });
+    process.env.MONGO_URI = memoryServer.getUri('flattown_test');
+  }
 
   const { connectDatabase } = await import('../../src/config/db');
   const { loadPlatformConfig } = await import('../../src/services/platformConfig.service');

@@ -34,8 +34,9 @@ the booking token, held in escrow**.
 20. [Payment webhook setup](#20-payment-webhook-setup)
 21. [API documentation](#21-api-documentation)
 22. [Demo accounts](#22-demo-accounts)
-23. [Known limitations](#23-known-limitations)
-24. [Future enhancements](#24-future-enhancements)
+23. [Response-envelope contract](#23-response-envelope-contract-why-hooks-must-unwrap-data)
+24. [Known limitations](#24-known-limitations)
+25. [Future enhancements](#25-future-enhancements)
 
 ---
 
@@ -156,8 +157,8 @@ Cloudinary. Only URLs are stored in MongoDB — never binaries.
 │   ├── ROLES.md
 │   ├── SECURITY.md
 │   └── DATABASE.md
+├── render.yaml            # Render blueprint — must be at the repo root
 ├── server/
-│   ├── render.yaml
 │   ├── .env.example
 │   ├── scripts/
 │   ├── test/
@@ -635,7 +636,8 @@ Both must complete with zero TypeScript errors and zero ESLint errors.
 
 Verified in a real browser against every breakpoint the specification names —
 320, 360, 375, 390, 414, 480, 768, 820, 1024, 1280, 1366, 1440 and 1920 —
-on the marketplace, flat detail, project detail, compare and both auth pages.
+on the marketplace, flat detail, project detail, compare, both auth pages and
+the signed-in role dashboards (admin, builder, buyer, agent).
 
 At each width the check measures, per element, whether anything extends past
 the viewport and whether an overflowing element is contained by a scroll or
@@ -643,6 +645,45 @@ clip container. Results: **no horizontal page overflow and no uncontained
 overflowing element at any breakpoint.** The only elements wider than the
 viewport are the BHK and tier chips, which sit inside `.ft-scroll-x` — the
 "horizontally scrollable chips" behaviour the specification asks for.
+
+### Accessibility
+
+Audited with Lighthouse (which runs axe-core against the accessibility tree)
+on the six public routes and the signed-in dashboards:
+
+| Route | Accessibility | SEO | Best practices |
+| --- | --- | --- | --- |
+| `/` | 1.00 | 1.00 | 1.00 |
+| `/flat/[id]` | 1.00 | 1.00 | 1.00 |
+| `/project/[id]` | 1.00 | 1.00 | 1.00 |
+| `/compare` | 1.00 | 1.00 | 1.00 |
+| `/auth/login`, `/auth/register` | 1.00 | 1.00 | 1.00 |
+| `/buyer`, `/builder`, `/admin`, `/admin/escrow` | 1.00 | — | — |
+
+Zero failing audits. The fixes that got it there are worth recording, because
+several were invisible to the TypeScript compiler:
+
+* **Colour contrast.** Body text used `text-slate-400` (2.56:1 on white). Now
+  `text-slate-500` (4.76:1), or `text-slate-600` where the text sits on a
+  `slate-100` surface (`MapView`, `code` chips), where `slate-500` only reaches
+  4.34:1. The RERA badge moved from `emerald-600` to `emerald-700` (3.76:1 →
+  5.48:1) — still unmistakably green.
+* **Carousel tap targets.** The pagination pills were 8×6px. The button is now
+  a fixed 24×24 target with the pill drawn inside it (WCAG 2.2 target-size),
+  so the look is unchanged and adjacent dots can't shrink each other's hit area.
+* **Heading order.** `EmptyState` hardcoded an `<h3>`, which produced h1→h3
+  skips wherever it rendered before the page's first h2. It now renders a
+  paragraph unless a caller passes `headingLevel`. `CardTitle` gained an `as`
+  prop for the same reason.
+* **Definition lists.** The project `<dl>` had a `<p>` as a direct child of a
+  `<dt>`/`<dd>` wrapper; the hint now lives inside the `<dd>`.
+* **Named controls.** Gallery thumbnails had `alt=""` images and no
+  accessible name, so each tab button is labelled.
+* **Logo link.** The wordmark is `FLAT`+`TOWN` in adjacent spans, so axe reads
+  the visible text as "FLAT TOWN". The link previously had a hand-written
+  `aria-label` spelling it differently, which failed
+  label-content-name-mismatch on every audit. It now has no `aria-label` and is
+  named by its own content, so the two cannot drift apart again.
 
 The results grid is a genuine responsive grid rather than a shrunken desktop
 layout:
@@ -704,18 +745,87 @@ headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
 
 ## 17. Deploying to Render
 
-1. Render → **New → Blueprint** → point at the repository. `server/render.yaml`
-   is picked up automatically.
-2. Fill in every `sync: false` value as a secret:
-   `MONGO_URI`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `REDIS_URL`, `RAZORPAY_KEY`,
-   `RAZORPAY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `ESCROW_ACCOUNT_ID`,
-   `CLOUDINARY_URL`, `SMTP_*`, `MAIL_FROM`, `FRONTEND_URL`, `BACKEND_URL`.
-3. `ALLOW_MOCK_PAYMENTS` is set to `false` in the blueprint — a production deploy
-   cannot simulate money even if Razorpay keys are missing.
-4. Build `npm ci && npm run build`, start `npm start`, health check `/health`.
+The API is the **`server/`** package; the web app is deployed separately to
+Vercel from `web/`.
 
-Manual configuration works too: root `server`, build `npm ci && npm run build`,
-start `npm start`, health `/health`.
+### Recommended: the blueprint
+
+Render → **New → Blueprint** → point at the repository. The root
+[`render.yaml`](./render.yaml) is picked up automatically. Fill in every
+`sync: false` value as a secret: `MONGO_URI`, `JWT_SECRET`, `JWT_REFRESH_SECRET`,
+`REDIS_URL`, `RAZORPAY_KEY`, `RAZORPAY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`,
+`CLOUDINARY_URL`, `SMTP_*`, `MAIL_FROM`, `FRONTEND_URL`, `BACKEND_URL`.
+
+### Manual configuration
+
+If you created the service by hand, the settings must be exactly:
+
+| Setting | Value |
+| --- | --- |
+| **Root Directory** | `server` |
+| Build Command | `npm ci --include=dev && npm run build` |
+| Start Command | `npm start` |
+| Health Check Path | `/health` |
+| Environment | `NODE_ENV=production` |
+
+**Root Directory must be `server`.** There is no `src/` directory in this
+repository — the TypeScript sources live in `server/src/`, and `tsc` compiles
+them to `server/dist/`. Setting the Root Directory to `src/server` (or leaving it
+blank while copying a `cd server` build command) produces:
+
+```
+Error: Cannot find module '/opt/render/project/src/server/dist/index.js'
+    code: 'MODULE_NOT_FOUND'
+```
+
+which means Node ran `node dist/index.js` from the wrong directory. Fix it in
+**Settings → Build & Deploy → Root Directory** and redeploy.
+
+**Why `npm ci --include=dev`?** The blueprint sets `NODE_ENV=production`, and npm
+omits devDependencies when that is set. `tsc` is a devDependency, so a plain
+`npm ci` would install no compiler and the build would fail with
+`tsc: not found`. `--include=dev` forces the toolchain to install.
+
+**PORT is deliberately not set** — Render injects it and the app reads it from
+the environment. Pinning it to `5000` breaks Render's routing.
+
+`ALLOW_MOCK_PAYMENTS` is pinned to `false`, and the server refuses to boot in
+production if it is not — a misconfigured deploy fails loudly rather than
+quietly simulating money.
+
+### Verify the deploy locally first
+
+```bash
+cd server
+npm run verify:boot
+```
+
+This compiles the project and boots the **compiled** `dist/` bundle the way
+Render does — `NODE_ENV=production`, a platform-injected `PORT`, mock payments
+disabled — then calls `/health` and `/api/v1/flats`. It catches the class of
+failure seen here (wrong Root Directory, missing build output, a pinned port)
+before it reaches Render.
+
+The production rails can be seen by deliberately breaking the config:
+
+```
+Refusing to start in production with an unsafe configuration:
+  - JWT_SECRET must be set to a unique value of at least 32 characters
+  - JWT_REFRESH_SECRET must be set to a unique value of at least 32 characters
+  - ALLOW_MOCK_PAYMENTS must be false in production
+```
+
+### Environment variable names
+
+The names below must match `server/src/config/env.ts`. Older docs and templates
+used different names, which were silently ignored:
+
+| Variable | Scale | Legacy alias also accepted |
+| --- | --- | --- |
+| `TIER_BUDGET` / `TIER_MID` | rupees | — |
+| `COMMISSION` | fraction (`0.10` = 10%) | `COMMISSION_PERCENT` (percent, `10`) |
+| `AGENT_PLATFORM_PERCENT` | percent | `AGENT_SPLIT_PLATFORM` |
+| `MAIL_FROM` | — | `EMAIL_FROM` |
 
 ---
 
@@ -955,7 +1065,43 @@ self-registration: `POST /auth/register` rejects `role: "admin"`.
 
 ---
 
-## 23. Known limitations
+## 23. Response-envelope contract (why hooks must unwrap `.data`)
+
+Every endpoint responds with the envelope `{ success, message, data, meta }`, and
+`lib/api.ts` turns that into `{ data, meta, message }`. A hook that returns the
+whole object — instead of `queryFn: () => api.list().then((r) => r.data)` —
+hands consumers an object where they expect an array.
+
+This is invisible to `tsc`: `(bookings ?? []) as Booking[]` compiles happily and
+only fails at runtime. `as` is a claim, not a check. It broke eight routes at
+once, so the rule is enforced by convention and covered by
+`npm run audit:contract`:
+
+| Hook | Symptom |
+| --- | --- |
+| `useBookings` | `B.filter is not a function` on `/buyer`, `/buyer/bookings`, `/buyer/loan`, `/builder/bookings`, `/builder/payouts`, `/agent` |
+| `useAdminLoanApplications` | `F.map is not a function` on `/admin/loan-partners` |
+| `useDisputes`, `useAdminReviews`, `useProjectFlats` | Same class; caught in the same sweep |
+
+Two related contract bugs found the same way:
+
+* `BuilderDashboard` typed an `escrow: { held, released, commission }` block the
+  endpoint never returned — the server sends `payouts` with different field
+  names — so `/builder` died on `escrow.held`. The type now mirrors
+  `getBuilderDashboard` exactly, including the `recentFlats` list the server was
+  not sending (added there, reusing the query it already ran).
+* `Requirement.bhk` is a single BHK count server-side, but was typed
+  `number[]` and rendered with `.bhk?.join(', ')`. `?.` guards null, not a
+  number, so `/buyer` and `/buyer/requirements` threw. The type, the renderer
+  and the configuration picker (now single-select, as the API requires) agree.
+
+Related: a **server component** must never pass a function into a client
+component. `app/buyer/wishlist/page.tsx` passed `icon={Heart}` to the client
+`WishlistGrid`; Next.js threw *"Functions cannot be passed directly to Client
+Components"* on every request and `/buyer/wishlist` hung instead of rendering.
+The icon now comes from the `wishlist` EmptyState preset.
+
+## 24. Known limitations
 
 * **RERA verification is manual.** An admin checks the registration against the
   state registry in the console. The spec allows a state RERA API; the interface
@@ -994,7 +1140,7 @@ self-registration: `POST /auth/register` rejects `role: "admin"`.
 
 ---
 
-## 24. Future enhancements
+## 25. Future enhancements
 
 **Marketplace**
 

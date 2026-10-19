@@ -1,7 +1,5 @@
 'use client';
 
-import type { LucideIcon } from 'lucide-react';
-
 import { EmptyState } from '@/components/common/States';
 import { FlatCard } from '@/components/marketplace/FlatCard';
 import { Button } from '@/components/ui/button';
@@ -10,8 +8,13 @@ import { useWishlist } from '@/hooks/useFlats';
 import { formatDate } from '@/lib/price';
 import type { FlatSummary } from '@/lib/types';
 
-/** Wishlist entries with their flat payload, falling back to a fetch-friendly note. */
-export const WishlistGrid = ({ icon }: { icon: LucideIcon }) => {
+/**
+ * Wishlist entries with their flat payload, falling back to a fetch-friendly note.
+ *
+ * Takes no props on purpose: the `wishlist` EmptyState preset supplies its own
+ * icon, so nothing has to cross the server/client boundary.
+ */
+export const WishlistGrid = () => {
   const { data, isLoading } = useWishlist();
   const entries = data ?? [];
 
@@ -20,7 +23,6 @@ export const WishlistGrid = ({ icon }: { icon: LucideIcon }) => {
   if (entries.length === 0) {
     return (
       <EmptyState
-        icon={icon}
         preset="wishlist"
         actionLabel="Browse the marketplace"
         actionHref="/"

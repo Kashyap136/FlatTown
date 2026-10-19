@@ -132,7 +132,7 @@ export const FlatActionPanel = ({ flat }: { flat: FlatDetail }) => {
             </p>
           ) : null}
 
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-500">
             You can compare up to {MAX_COMPARE} flats at a time
             {compareIds.length ? ` (${compareIds.length} selected)` : ''}.
           </p>

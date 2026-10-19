@@ -144,7 +144,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           {project.description ? (
             <Card>
               <CardHeader>
-                <CardTitle>About this project</CardTitle>
+                <CardTitle as="h2">About this project</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-[13px] leading-relaxed text-slate-700">{project.description}</p>
@@ -155,7 +155,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           {/* -------------------------- tier distribution --------------------- */}
           <Card>
             <CardHeader>
-              <CardTitle>Tier distribution</CardTitle>
+              <CardTitle as="h2">Tier distribution</CardTitle>
               <p className="text-[13px] text-slate-600">
                 Every tier is calculated by the platform from the total price, not chosen by the builder.
               </p>
@@ -184,7 +184,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
           <Card>
             <CardHeader>
-              <CardTitle>Location</CardTitle>
+              <CardTitle as="h2">Location</CardTitle>
             </CardHeader>
             <CardContent>
               <MapView
@@ -295,12 +295,16 @@ const Fact = ({
   hint?: string;
 }) => (
   <div className="rounded-lg border border-slate-200 bg-white p-3">
-    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-500">
+    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-slate-600">
       <Icon className="size-3.5" aria-hidden="true" />
       {label}
     </dt>
-    <dd className="mt-1 text-sm font-semibold text-slate-900">{value}</dd>
-    {hint ? <p className="mt-0.5 text-[11px] text-slate-500">{hint}</p> : null}
+    <dd className="mt-1 text-sm font-semibold text-slate-900">
+      {value}
+      {/* The hint belongs inside the <dd>: a <dl> may only contain dt/dd (or a
+          wrapper holding only those), so a sibling <p> was invalid markup. */}
+      {hint ? <span className="mt-0.5 block text-[11px] font-normal text-slate-600">{hint}</span> : null}
+    </dd>
   </div>
 );
 

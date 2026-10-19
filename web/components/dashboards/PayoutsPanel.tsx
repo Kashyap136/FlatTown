@@ -99,7 +99,7 @@ export const PayoutsPanel = () => {
                       <td className="p-3 text-right text-[13px] tabular-nums text-slate-600">
                         {formatINR(booking.escrow?.platformAmount ?? 0)}
                         {booking.escrow?.agentAmount ? (
-                          <span className="block text-[11px] text-slate-400">
+                          <span className="block text-[11px] text-slate-500">
                             incl. agent {formatINR(booking.escrow.agentAmount)}
                           </span>
                         ) : null}
@@ -121,7 +121,7 @@ export const PayoutsPanel = () => {
                           {booking.escrowStatus.replace(/_/g, ' ')}
                         </Badge>
                         {booking.escrow?.releasedAt ? (
-                          <span className="mt-1 block text-[10px] text-slate-400">
+                          <span className="mt-1 block text-[10px] text-slate-500">
                             {formatDateTime(booking.escrow.releasedAt)}
                           </span>
                         ) : null}

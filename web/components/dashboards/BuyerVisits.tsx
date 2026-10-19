@@ -103,23 +103,23 @@ export const BuyerVisits = () => {
 
                   <dl className="grid gap-2 text-[13px] sm:grid-cols-3">
                     <div className="flex items-center gap-1.5">
-                      <CalendarDays className="size-3.5 text-slate-400" aria-hidden="true" />
+                      <CalendarDays className="size-3.5 text-slate-500" aria-hidden="true" />
                       <span className="text-slate-600">
-                        <span className="block text-[11px] text-slate-400">Date</span>
+                        <span className="block text-[11px] text-slate-500">Date</span>
                         <span className="font-medium text-slate-800">{formatDate(visit.slot?.date)}</span>
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Clock className="size-3.5 text-slate-400" aria-hidden="true" />
+                      <Clock className="size-3.5 text-slate-500" aria-hidden="true" />
                       <span className="text-slate-600">
-                        <span className="block text-[11px] text-slate-400">Slot</span>
+                        <span className="block text-[11px] text-slate-500">Slot</span>
                         <span className="font-medium text-slate-800">{visit.slot?.time}</span>
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <IndianRupee className="size-3.5 text-slate-400" aria-hidden="true" />
+                      <IndianRupee className="size-3.5 text-slate-500" aria-hidden="true" />
                       <span className="text-slate-600">
-                        <span className="block text-[11px] text-slate-400">Charge</span>
+                        <span className="block text-[11px] text-slate-500">Charge</span>
                         <span className="font-medium text-slate-800">
                           {visit.visitCharge > 0 ? formatINR(visit.visitCharge) : 'Free'}
                         </span>

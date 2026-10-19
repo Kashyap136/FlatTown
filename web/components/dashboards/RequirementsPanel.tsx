@@ -31,7 +31,10 @@ export const RequirementsPanel = () => {
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<string | null>(null);
 
-  const [bhk, setBhk] = useState<number[]>([2]);
+  // The server stores a single BHK count (`Requirement.bhk` is a Number enum of
+// 1-4), so this is single-select — offering a multi-select here would only ever
+// post one value and silently drop the buyer's other picks.
+const [bhk, setBhk] = useState<number | undefined>(2);
   const [budgetMin, setBudgetMin] = useState(40);
   const [budgetMax, setBudgetMax] = useState(80);
   const [city, setCity] = useState('Pune');
@@ -42,8 +45,8 @@ export const RequirementsPanel = () => {
 
   const submit = async () => {
     setError(null);
-    if (bhk.length === 0) {
-      setError('Pick at least one configuration.');
+    if (bhk === undefined) {
+      setError('Pick a configuration.');
       return;
     }
     if (budgetMin * LAKH >= budgetMax * LAKH) {
@@ -134,12 +137,12 @@ export const RequirementsPanel = () => {
                 <legend className="mb-1.5 text-sm font-semibold text-slate-900">Configuration</legend>
                 <div className="grid grid-cols-4 gap-2">
                   {BHK_OPTIONS.map((value) => {
-                    const active = bhk.includes(value);
+                    const active = bhk === value;
                     return (
                       <button
                         key={value}
                         type="button"
-                        onClick={() => setBhk(active ? bhk.filter((v) => v !== value) : [...bhk, value])}
+                        onClick={() => setBhk(value)}
                         aria-pressed={active}
                         className={`rounded-lg border px-2 py-2 text-sm font-semibold transition-colors ${
                           active ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-slate-300 bg-white text-slate-700'
@@ -247,7 +250,7 @@ export const RequirementsPanel = () => {
                     <CardContent className="flex flex-wrap items-center justify-between gap-3 p-3.5">
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-slate-900">
-                          {requirement.bhk?.join(', ')} BHK · {requirement.city ?? 'Any city'}
+                          {requirement.bhk ? `${requirement.bhk} BHK` : 'Any BHK'} · {requirement.city ?? 'Any city'}
                           {requirement.locality ? `, ${requirement.locality}` : ''}
                         </p>
                         <p className="text-xs text-slate-600">

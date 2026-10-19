@@ -59,7 +59,8 @@ before(async () => {
   // This is the whole point of the suite: cache ON.
   process.env.REDIS_URL = REDIS_URL;
 
-  mongod = await MongoMemoryServer.create();
+  // Same generous timeout as the main harness — see test/helpers/harness.ts.
+  mongod = await MongoMemoryServer.create({ timeout: 120_000 });
   process.env.MONGO_URI = mongod.getUri('flattown_redis');
 
   const { connectDatabase } = await import('../src/config/db');

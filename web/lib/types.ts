@@ -586,7 +586,15 @@ export interface Requirement {
   _id?: string;
   id?: string;
   buyerId: string;
-  bhk: number[];
+  /**
+   * A single BHK count (1-4), NOT an array.
+   *
+   * The server stores `bhk` as a scalar Number enum (see `Requirement.ts`), and
+   * only wraps it in an array inside the match engine. This was typed as
+   * `number[]`, so `.bhk?.join()` threw "join is not a function" at runtime —
+   * `?.` guards null/undefined, never a number.
+   */
+  bhk?: number;
   budgetMin: number;
   budgetMax: number;
   city?: string;
@@ -597,6 +605,23 @@ export interface Requirement {
   notes?: string;
   isActive: boolean;
   createdAt: string;
+}
+
+/** A dispute raised against a booking, flat or site visit. */
+export interface Dispute {
+  _id?: string;
+  id?: string;
+  subject: string;
+  description: string;
+  category: string;
+  status: string;
+  resolution?: string;
+  createdAt: string;
+  updatedAt?: string;
+  raisedByRole?: string;
+  bookingId?: string;
+  flatId?: string;
+  siteVisitId?: string;
 }
 
 export interface WishlistEntry {

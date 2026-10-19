@@ -100,11 +100,21 @@ export const ImageCarousel = ({
                   onClick={() => setIndex(slideIndex)}
                   aria-label={`Go to image ${slideIndex + 1}`}
                   aria-current={slideIndex === index}
-                  className={cn(
-                    'h-1.5 rounded-full transition-all',
-                    slideIndex === index ? 'w-6 bg-white' : 'w-2 bg-white/60 hover:bg-white/90',
-                  )}
-                />
+                  className="group grid size-6 place-items-center rounded-full"
+                >
+                  {/* The pill is 6px tall and would be a 8-24px tap target.
+                      The button itself is a fixed 24x24 (WCAG 2.2 target-size
+                      2.5.8) and the pill is drawn inside it, so the dots can
+                      never shrink each other's hit area. */}
+                  <span
+                    className={cn(
+                      'block h-1.5 rounded-full transition-all',
+                      slideIndex === index
+                        ? 'w-6 bg-white'
+                        : 'w-2 bg-white/60 group-hover:bg-white/90',
+                    )}
+                  />
+                </button>
               ))}
             </div>
           </>
@@ -130,6 +140,9 @@ export const ImageCarousel = ({
               type="button"
               role="tab"
               aria-selected={slideIndex === index}
+              // The thumbnail's own <img alt=""> is decorative, so without this
+              // the tab has no accessible name at all.
+              aria-label={`Show image ${slideIndex + 1} of ${slides.length}`}
               onClick={() => setIndex(slideIndex)}
               className={cn(
                 'relative size-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors',

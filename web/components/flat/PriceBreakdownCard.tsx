@@ -61,7 +61,7 @@ export const PriceBreakdownCard = ({
             <div key={row.label} className="flex items-start justify-between gap-3 text-sm">
               <dt className="text-slate-600">
                 {row.label}
-                {row.hint ? <span className="block text-[11px] text-slate-400">{row.hint}</span> : null}
+                {row.hint ? <span className="block text-[11px] text-slate-500">{row.hint}</span> : null}
               </dt>
               <dd className="shrink-0 font-medium tabular-nums text-slate-900">{row.value}</dd>
             </div>

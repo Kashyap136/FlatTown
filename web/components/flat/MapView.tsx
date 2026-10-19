@@ -172,17 +172,17 @@ const MapFallback = ({ marker, height }: { marker: Marker; height: string }) => 
   return (
     <div className={cn('flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-100')}>
       <div className={cn('flex flex-col justify-center gap-1 p-4', height)}>
-        <div className="flex items-center gap-2 text-slate-400">
+        <div className="flex items-center gap-2 text-slate-500">
           <MapPin className="size-5 shrink-0" aria-hidden="true" />
           <span className="text-sm font-medium text-slate-700">
             {marker.label ?? 'Project location'}
           </span>
         </div>
         {marker.address ? <p className="pl-7 text-xs text-slate-600">{marker.address}</p> : null}
-        <p className="pl-7 text-[11px] tabular-nums text-slate-400">
+        <p className="pl-7 text-[11px] tabular-nums text-slate-600">
           {marker.lat.toFixed(5)}, {marker.lng.toFixed(5)}
         </p>
-        <p className="pl-7 flex items-center gap-1.5 text-[11px] text-slate-400">
+        <p className="pl-7 flex items-center gap-1.5 text-[11px] text-slate-600">
           <Loader2 className="size-3" aria-hidden="true" />
           Interactive map off — coordinates above
         </p>
@@ -201,8 +201,11 @@ const MapFallback = ({ marker, height }: { marker: Marker; height: string }) => 
           </a>
         </Button>
         {!MAPBOX_TOKEN ? (
-          <p className="w-full text-[11px] text-slate-500">
-            Set <code className="rounded bg-slate-100 px-1">NEXT_PUBLIC_MAPBOX_TOKEN</code> for the interactive
+          <p className="w-full text-[11px] text-slate-600">
+            Set{' '}
+            {/* slate-600, not slate-500: the <code> chip paints its own
+                slate-100 background, where slate-500 only reaches 4.34:1. */}
+            <code className="rounded bg-slate-100 px-1 text-slate-700">NEXT_PUBLIC_MAPBOX_TOKEN</code> for the interactive
             Mapbox GL view with markers and controls.
           </p>
         ) : null}

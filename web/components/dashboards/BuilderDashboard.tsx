@@ -33,7 +33,9 @@ export const BuilderDashboard = () => {
     );
   }
 
-  const { stats, projects, escrow } = data;
+  // The API returns `payouts`, not `escrow`. Reading `escrow` left it
+  // undefined and crashed the whole dashboard on `escrow.held`.
+  const { stats, projects, payouts } = data;
 
   return (
     <div className="space-y-6">
@@ -73,17 +75,17 @@ export const BuilderDashboard = () => {
         <CardContent className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-lg bg-emerald-50 p-3">
             <p className="text-[11px] uppercase tracking-wide text-emerald-700">Held in escrow</p>
-            <p className="mt-1 text-xl font-bold tabular-nums text-emerald-900">{formatINR(escrow.held)}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-emerald-900">{formatINR(payouts.heldInEscrow)}</p>
             <p className="mt-0.5 text-[11px] text-emerald-800">Released only by an admin</p>
           </div>
           <div className="rounded-lg bg-slate-50 p-3">
             <p className="text-[11px] uppercase tracking-wide text-slate-500">Released to you</p>
-            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900">{formatINR(escrow.released)}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900">{formatINR(payouts.releasedToBuilder)}</p>
             <p className="mt-0.5 text-[11px] text-slate-600">90% of each released token</p>
           </div>
           <div className="rounded-lg bg-slate-50 p-3">
             <p className="text-[11px] uppercase tracking-wide text-slate-500">Platform commission</p>
-            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900">{formatINR(escrow.commission)}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-slate-900">{formatINR(payouts.platformCommissionRetained)}</p>
             <p className="mt-0.5 text-[11px] text-slate-600">10% of the booking token only</p>
           </div>
         </CardContent>

@@ -34,6 +34,31 @@ const isPlaceholder = (value?: string): boolean => {
   );
 };
 
+/**
+ * Reads a percentage that may be written either as a percentage (`10`) or as a
+ * fraction (`0.10`).
+ *
+ * The specification names the variable `COMMISSION=0.10`, while this codebase
+ * historically read `COMMISSION_PERCENT=10`. Both are honoured so a value copied
+ * from `.env.example` or a deploy blueprint actually takes effect — previously
+ * `COMMISSION` was silently ignored.
+ */
+const percentOrFraction = (
+  fraction: string | undefined,
+  percent: string | undefined,
+  fallback: number,
+): number => {
+  const raw = fraction ?? percent;
+  if (raw === undefined || raw === '') return fallback;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) return fallback;
+  return parsed > 0 && parsed <= 1 ? parsed * 100 : parsed;
+};
+
+/** First non-empty value among several accepted environment variable names. */
+const firstOf = (...values: Array<string | undefined>): string | undefined =>
+  values.find((v) => v !== undefined && v !== '' && v.trim() !== '');
+
 const nodeEnv = process.env.NODE_ENV ?? 'development';
 const isProd = nodeEnv === 'production';
 
@@ -93,7 +118,9 @@ export const env = {
   smtpPort: num(process.env.SMTP_PORT, 587),
   smtpUser: process.env.SMTP_USER ?? '',
   smtpPass: process.env.SMTP_PASS ?? '',
-  emailFrom: process.env.EMAIL_FROM ?? 'Flat Town <noreply@flattown.local>',
+  // `MAIL_FROM` is the name published in .env.example; `EMAIL_FROM` is the
+  // historical name. Both are accepted so the documented value is not ignored.
+  emailFrom: firstOf(process.env.EMAIL_FROM, process.env.MAIL_FROM) ?? 'Flat Town <noreply@flattown.local>',
 
   // SMS abstraction (provider-agnostic)
   smsProvider: process.env.SMS_PROVIDER ?? 'log',
@@ -103,9 +130,18 @@ export const env = {
   // Business defaults (mirrored into PlatformConfig by the seeder)
   defaultTierBudget: num(process.env.TIER_BUDGET, 5_000_000),
   defaultTierMid: num(process.env.TIER_MID, 15_000_000),
-  defaultCommissionPercent: num(process.env.COMMISSION_PERCENT, 10),
-  defaultAgentSplitPlatformPercent: num(process.env.AGENT_SPLIT_PLATFORM, 70),
-  defaultAgentSplitAgentPercent: num(process.env.AGENT_SPLIT_AGENT, 30),
+  // `COMMISSION` is the specification's name and is a fraction (0.10 = 10%);
+  // `COMMISSION_PERCENT` is the legacy percentage form (10). Both normalise to a
+  // percentage here.
+  defaultCommissionPercent: percentOrFraction(process.env.COMMISSION, process.env.COMMISSION_PERCENT, 10),
+  defaultAgentSplitPlatformPercent: num(
+    firstOf(process.env.AGENT_PLATFORM_PERCENT, process.env.AGENT_SPLIT_PLATFORM),
+    70,
+  ),
+  defaultAgentSplitAgentPercent: num(
+    firstOf(process.env.AGENT_AGENT_PERCENT, process.env.AGENT_SPLIT_AGENT),
+    30,
+  ),
   defaultTokenAmount: num(process.env.DEFAULT_TOKEN_AMOUNT, 50_000),
   defaultVisitCharge: num(process.env.DEFAULT_VISIT_CHARGE, 199),
   maxUploadMb: num(process.env.MAX_UPLOAD_MB, 10),

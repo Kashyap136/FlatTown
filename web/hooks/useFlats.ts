@@ -38,6 +38,7 @@ import type {
   Amenity,
   Booking,
   CityOption,
+  Dispute,
   FlatDetail,
   FlatSummary,
   Inquiry,
@@ -163,7 +164,7 @@ export const useProject = (id: string): UseQueryResult<ProjectDetail> =>
 export const useProjectFlats = (projectId: string, params: Record<string, unknown> = {}) =>
   useQuery({
     queryKey: qk.projectFlats(projectId, JSON.stringify(params)),
-    queryFn: () => projectsApi.flats(projectId, params),
+    queryFn: () => projectsApi.flats(projectId, params).then((r) => r.data),
     enabled: Boolean(projectId),
     staleTime: 30_000,
   });
@@ -219,10 +220,22 @@ export type { VisitActions, VisitSlotOption } from './useVisit';
 
 /* -------------------------------- bookings ------------------------------- */
 
-export const useBookings = (params: Record<string, unknown> = {}, enabled = true) =>
+/**
+ * Bookings for the given scope.
+ *
+ * Must unwrap `.data` like every other hook here. Returning the raw
+ * `{ success, message, data }` envelope meant callers doing
+ * `(bookings ?? []) as Booking[]` kept the *object*, so `.filter`/`.map`/`.length`
+ * misbehaved and six dashboards (buyer overview, buyer bookings, buyer loan,
+ * builder bookings, builder payouts, agent) crashed into the error boundary.
+ */
+export const useBookings = (
+  params: Record<string, unknown> = {},
+  enabled = true,
+): UseQueryResult<Booking[]> =>
   useQuery({
     queryKey: qk.bookings(JSON.stringify(params)),
-    queryFn: () => bookingsApi.list(params),
+    queryFn: () => bookingsApi.list(params).then((r) => r.data),
     enabled,
     staleTime: 20_000,
   });
@@ -553,24 +566,32 @@ export const usePlatformConfig = (enabled = true): UseQueryResult<{ config: Plat
 export const useAdminAmenities = (enabled = true) =>
   useQuery({ queryKey: qk.adminAmenities, queryFn: () => adminApi.amenities().then((r) => r.data), enabled });
 
-export const useDisputes = (params: Record<string, unknown> = {}, enabled = true) =>
+export const useDisputes = (
+  params: Record<string, unknown> = {},
+  enabled = true,
+): UseQueryResult<Dispute[]> =>
   useQuery({
     queryKey: qk.disputes(JSON.stringify(params)),
-    queryFn: () => adminApi.disputes(params),
+    queryFn: () => adminApi.disputes(params).then((r) => r.data),
     enabled,
   });
 
 export const useAdminReviews = (params: Record<string, unknown> = {}, enabled = true) =>
   useQuery({
     queryKey: qk.adminReviews(JSON.stringify(params)),
-    queryFn: () => adminApi.reviews(params),
+    queryFn: () => adminApi.reviews(params).then((r) => r.data),
     enabled,
   });
 
-export const useAdminLoanApplications = (params: Record<string, unknown> = {}, enabled = true) =>
+/** Unwraps `.data` like every other list hook — the raw envelope is an object,
+ *  which surfaced as "map is not a function" on /admin/loan-partners. */
+export const useAdminLoanApplications = (
+  params: Record<string, unknown> = {},
+  enabled = true,
+): UseQueryResult<LoanApplication[]> =>
   useQuery({
     queryKey: qk.adminLoanApplications(JSON.stringify(params)),
-    queryFn: () => adminApi.loanApplications(params),
+    queryFn: () => adminApi.loanApplications(params).then((r) => r.data),
     enabled,
   });
 

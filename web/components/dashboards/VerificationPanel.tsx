@@ -234,7 +234,7 @@ export const VerificationPanel = () => {
           <p>
             A RERA badge is a promise to buyers. If builders could set it themselves the badge would be worthless, so
             the only route to a verified state is{' '}
-            <code className="rounded bg-slate-100 px-1">PUT /admin/verify-rera/:builderId</code>, which is protected by
+            <code className="rounded bg-slate-100 px-1 text-slate-700">PUT /admin/verify-rera/:builderId</code>, which is protected by
             the admin role middleware and written to the audit log.
           </p>
           <p className="flex items-center gap-1.5">

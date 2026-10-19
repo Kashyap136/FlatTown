@@ -55,7 +55,7 @@ export const BookingStatusTimeline = ({ booking, className }: { booking: Booking
               {done ? <Check className="size-2.5" /> : <Circle className="size-2" />}
             </span>
             <span className="min-w-0">
-              <span className={cn('block text-[11px] font-semibold', active ? 'text-emerald-800' : done ? 'text-slate-800' : 'text-slate-400')}>
+              <span className={cn('block text-[11px] font-semibold', active ? 'text-emerald-800' : done ? 'text-slate-800' : 'text-slate-500')}>
                 {step.label}
               </span>
               {active ? <span className="mt-0.5 block text-[10px] leading-snug text-slate-600">{step.description}</span> : null}

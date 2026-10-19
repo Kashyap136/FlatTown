@@ -222,7 +222,10 @@ export const getBuilderDashboard = async (req: Request, res: Response, next: Nex
 
     const [projects, flats, viewsAgg, inquiries, visits, bookings, reviews] = await Promise.all([
       Project.find({ builderId }).select('projectName isRERAVerified isApproved status tierStats availableFlats totalFlats minPrice maxPrice images city locality possessionDate').lean(),
-      Flat.find({ builderId }).select('views inquiriesCount visitCharge tokenAmount totalPrice tier bhk isAvailable').lean(),
+      Flat.find({ builderId })
+        .select('title views inquiriesCount visitCharge tokenAmount totalPrice pricePerSqft tier bhk sizeSqft isAvailable createdAt')
+        .sort({ createdAt: -1 })
+        .lean(),
       Flat.aggregate([
         { $match: { builderId } },
         { $group: { _id: null, views: { $sum: '$views' }, inquiries: { $sum: '$inquiriesCount' } } },
@@ -296,6 +299,9 @@ export const getBuilderDashboard = async (req: Request, res: Response, next: Nex
         verificationRequestedAt: req.user.verificationRequestedAt,
       },
       projects,
+      // The builder dashboard's "Your inventory" rail. Already fetched above
+      // for `stats`, so this costs no extra query.
+      recentFlats: flats.slice(0, 10),
       recentInquiries: inquiries,
       upcomingVisits: visits.filter((v) => ['requested', 'confirmed'].includes(v.status)),
       recentBookings: bookings,

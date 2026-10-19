@@ -112,7 +112,7 @@ export const NotificationBell = () => {
                             <div className="min-w-0">
                               <p className="text-sm font-semibold text-slate-900">{item.title}</p>
                               <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{item.body}</p>
-                              <p className="mt-1 text-[11px] text-slate-400">{formatDateTime(item.createdAt)}</p>
+                              <p className="mt-1 text-[11px] text-slate-500">{formatDateTime(item.createdAt)}</p>
                             </div>
                           </div>
                         </Link>

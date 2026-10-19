@@ -11,7 +11,9 @@ const badgeVariants = cva(
         neutral: 'border-slate-200 bg-slate-50 text-slate-700',
         brand: 'border-emerald-200 bg-emerald-50 text-emerald-800',
         // RULE: the RERA badge must be unmistakably green.
-        rera: 'border-emerald-500 bg-emerald-600 text-white',
+        // emerald-700 (not -600) keeps white text at 5.5:1; -600 only reached
+        // 3.8:1 and failed WCAG AA.
+        rera: 'border-emerald-600 bg-emerald-700 text-white',
         info: 'border-sky-200 bg-sky-50 text-sky-800',
         warning: 'border-amber-300 bg-amber-50 text-amber-800',
         danger: 'border-rose-200 bg-rose-50 text-rose-700',

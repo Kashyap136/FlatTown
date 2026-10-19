@@ -16,6 +16,19 @@ import { cn, initials } from '@/lib/utils';
 
 /* --------------------------------- brand ---------------------------------- */
 
+/**
+ * Brand mark.
+ *
+ * The wordmark must stay a child (not an `aria-label` on the link): splitting
+ * "FLAT" + "TOWN" across two spans makes axe join the visible text as
+ * "FLAT TOWN", and any hand-written label that spelled it differently tripped
+ * label-content-name-mismatch. Letting the content name the link guarantees the
+ * accessible name and the visible label can never drift apart.
+ *
+ * `compact` renders only the aria-hidden monogram, so it carries an sr-only
+ * wordmark to stay named. sr-only text is not "visible", so it cannot itself
+ * trip the same rule.
+ */
 export const Logo = ({ compact = false, className }: { compact?: boolean; className?: string }) => (
   <span className={cn('inline-flex items-center gap-2', className)}>
     <span
@@ -24,12 +37,13 @@ export const Logo = ({ compact = false, className }: { compact?: boolean; classN
     >
       FT
     </span>
-    {!compact ? (
+    {compact ? (
+      <span className="sr-only">FLATTOWN home</span>
+    ) : (
       <span className="text-base font-black tracking-tight text-slate-900 sm:text-lg">
         FLAT<span className="text-emerald-700">TOWN</span>
       </span>
-    ) : null}
-    <span className="sr-only">FLAT TOWN home</span>
+    )}
   </span>
 );
 
@@ -237,7 +251,8 @@ export const SiteHeader = () => {
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="ft-container">
         <div className="flex h-14 items-center gap-2 sm:h-16 sm:gap-3">
-          <Link href="/" className="shrink-0" aria-label="FLAT TOWN marketplace">
+          {/* No aria-label: the Logo's own text names this link (see Logo). */}
+          <Link href="/" className="shrink-0">
             {/* The wordmark is dropped below `sm` so a 320px row still fits the
                 city selector, notification bell, sign-in and menu controls. */}
             <span className="hidden sm:inline">

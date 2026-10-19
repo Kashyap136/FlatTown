@@ -29,7 +29,10 @@ process.env.FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 (async () => {
   const { MongoMemoryServer } = await import('mongodb-memory-server');
-  const mongod = await MongoMemoryServer.create();
+  // The 10s default is too tight on a busy machine — it intermittently killed
+  // dev startup with "Instance failed to start within 10000ms". Same fix and
+  // same reasoning as test/helpers/harness.ts.
+  const mongod = await MongoMemoryServer.create({ timeout: 120_000 });
   process.env.MONGO_URI = mongod.getUri('flattown-dev');
   console.log(`[dev] in-memory MongoDB ready (data is discarded on shutdown)`);
 

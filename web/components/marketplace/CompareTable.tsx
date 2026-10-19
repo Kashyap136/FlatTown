@@ -107,7 +107,7 @@ export const CompareTable = () => {
                       <button
                         type="button"
                         onClick={() => remove(flat.id)}
-                        className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        className="shrink-0 rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
                         aria-label={`Remove ${flat.title} from the comparison`}
                       >
                         <X className="size-4" aria-hidden="true" />

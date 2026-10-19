@@ -28,6 +28,7 @@ import type {
   AuthPayload,
   Booking,
   CityOption,
+  Dispute,
   FlatDetail,
   FlatSearchPage,
   FlatSummary,
@@ -353,15 +354,50 @@ export const buildersApi = {
   agents: () => http.get<unknown[]>('/builders/me/agents', { auth: true }),
 };
 
+/**
+ * `GET /builders/me/dashboard`.
+ *
+ * This mirrors the payload the server actually builds (see
+ * `getBuilderDashboard`). It previously described a shape the endpoint never
+ * returned — `escrow`, `tierDistribution`, `pendingVisits`, `pendingBookings` —
+ * which typechecked fine and then blew up at runtime with
+ * "Cannot read properties of undefined (reading 'held')".
+ */
 export interface BuilderDashboard {
-  stats: { views: number; inquiries: number; visits: number; bookings: number; flats: number; projects: number };
+  stats: {
+    projects: number;
+    flats: number;
+    availableFlats: number;
+    views: number;
+    inquiries: number;
+    visits: number;
+    visitsByStatus: Record<string, number>;
+    bookings: number;
+    bookingsByEscrow: Record<string, { count: number; amount: number }>;
+    rating: { avg: number; count: number };
+  };
+  payouts: {
+    heldInEscrow: number;
+    pendingToBuilder: number;
+    platformCommissionRetained: number;
+    releasedToBuilder: number;
+    releasedBookings: number;
+    accountId?: string;
+  };
+  verification: {
+    isAdminVerified?: boolean;
+    isRERAVerified?: boolean;
+    reraNumber?: string;
+    kycStatus?: string;
+    kycDocs: number;
+    verificationRequestedAt?: string;
+  };
   projects: ProjectSummary[];
   recentFlats: FlatSummary[];
-  tierDistribution: Record<string, number>;
-  escrow: { held: number; released: number; commission: number };
-  pendingVisits: number;
-  pendingBookings: number;
-  rating: { avg: number; count: number };
+  recentInquiries: Inquiry[];
+  upcomingVisits: SiteVisit[];
+  recentBookings: Booking[];
+  reviews: Review[];
 }
 
 /* --------------------------------- visits --------------------------------- */
@@ -526,7 +562,7 @@ export const adminApi = {
   updateConfig: (body: Record<string, unknown>) =>
     http.put<{ config: PlatformConfigView }>('/admin/commission-config', body, { auth: true }),
   amenities: () => http.get<Amenity[]>('/admin/amenities', { auth: true }),
-  disputes: (params: Record<string, unknown> = {}) => http.get<Array<Record<string, unknown>>>('/admin/disputes', { params, auth: true }),
+  disputes: (params: Record<string, unknown> = {}) => http.get<Dispute[]>('/admin/disputes', { params, auth: true }),
   resolveDispute: (id: string, body: { status: string; resolution?: string }) =>
     http.put<{ dispute: Record<string, unknown> }>(`/admin/disputes/${id}`, body, { auth: true }),
   reviews: (params: Record<string, unknown> = {}) =>

@@ -221,7 +221,7 @@ export const BuyerDashboard = () => {
               <Card key={requirement._id ?? requirement.id}>
                 <CardContent className="space-y-2 p-4">
                   <p className="text-sm font-semibold text-slate-900">
-                    {requirement.bhk?.join(', ')} BHK in {requirement.city ?? 'any city'}
+                    {requirement.bhk ? `${requirement.bhk} BHK` : 'Any BHK'} in {requirement.city ?? 'any city'}
                   </p>
                   <p className="text-xs text-slate-600">
                     Budget {formatINR(requirement.budgetMin)} – {formatINR(requirement.budgetMax)}

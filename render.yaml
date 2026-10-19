@@ -1,0 +1,111 @@
+# =============================================================================
+# FLAT TOWN API — Render blueprint
+# =============================================================================
+#
+# IMPORTANT: this file MUST live at the repository ROOT. Render only
+# auto-detects a `render.yaml` in the root of the repository; a copy inside
+# `server/` is ignored, which is how the service ended up pointed at
+# `src/server` and failing with:
+#
+#   Error: Cannot find module '/opt/render/project/src/server/dist/index.js'
+#
+# Apply it with: Render dashboard -> New -> Blueprint, select this repository.
+# Or set the service settings manually (see README "Deploying to Render"):
+#
+#   Root Directory   server          <-- NOT src/server, NOT blank
+#   Build Command    npm ci --include=dev && npm run build
+#   Start Command    npm start
+#   Health Check     /health
+#
+# The backend is the `server/` package. The web app is deployed separately to
+# Vercel from the `web/` directory.
+# =============================================================================
+
+services:
+  - type: web
+    name: flattown-api
+    runtime: node
+    plan: starter
+    region: singapore
+
+    # The API package lives in server/, NOT src/server/.
+    rootDir: server
+
+    # `--include=dev` is required: this blueprint sets NODE_ENV=production, and
+    # npm omits devDependencies when NODE_ENV=production. `tsc` is a
+    # devDependency, so without this the build fails with "tsc: not found".
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: false
+
+    # PORT is deliberately NOT set — Render injects it and the app reads it
+    # from the environment (see src/config/env.ts).
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+
+      # ---- required secrets: set these in the Render dashboard ----
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: RAZORPAY_KEY
+        sync: false
+      - key: RAZORPAY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false # e.g. https://flattown.vercel.app
+      - key: BACKEND_URL
+        sync: false # e.g. https://flattown-api.onrender.com
+
+      # ---- escrow ----
+      - key: ESCROW_ACCOUNT_ID
+        value: flattown-escrow
+
+      # ---- business defaults (seeded into PlatformConfig; admins can change
+      #      them later at runtime) ----
+      #      These names must match src/config/env.ts:
+      #        COMMISSION               fraction, 0.10 = 10%
+      #        AGENT_PLATFORM_PERCENT   platform share of the commission
+      - key: TIER_BUDGET
+        value: 5000000
+      - key: TIER_MID
+        value: 15000000
+      - key: COMMISSION
+        value: 0.10
+      - key: AGENT_PLATFORM_PERCENT
+        value: 70
+      - key: DEFAULT_TOKEN_AMOUNT
+        value: 50000
+
+      # ---- email ----
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false # "Flat Town <no-reply@yourdomain.in>"
+
+      # The simulated payment gateway can never run in production. The server
+      # refuses to boot if this is true, so a misconfigured deploy fails loudly
+      # instead of quietly mocking real money.
+      - key: ALLOW_MOCK_PAYMENTS
+        value: 'false'
+      - key: MOCK_PAYMENT_KEY
+        generateValue: true

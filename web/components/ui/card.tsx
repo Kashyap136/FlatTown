@@ -23,11 +23,19 @@ export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<
 );
 CardHeader.displayName = 'CardHeader';
 
-export const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn('text-base font-semibold text-slate-900', className)} {...props} />
-  ),
-);
+/**
+ * Card heading.
+ *
+ * Defaults to `<h3>` like shadcn, but `as` lets a page place the card at the
+ * right depth. A hardcoded h3 becomes an axe heading-order violation on pages
+ * whose first card sits between the h1 and the first h2.
+ */
+export const CardTitle = React.forwardRef<
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement> & { as?: 'h2' | 'h3' | 'h4' }
+>(({ className, as: Heading = 'h3', ...props }, ref) => (
+  <Heading ref={ref} className={cn('text-base font-semibold text-slate-900', className)} {...props} />
+));
 CardTitle.displayName = 'CardTitle';
 
 export const CardDescription = React.forwardRef<

@@ -23,7 +23,7 @@ export const CompareTray = () => {
         <Scale className="size-4 shrink-0 text-emerald-400" aria-hidden="true" />
         <p className="min-w-0 flex-1 truncate text-[13px]">
           <span className="font-semibold">Comparing {ids.length}</span>
-          <span className="text-slate-400"> of {MAX_COMPARE} flats</span>
+          <span className="text-slate-500"> of {MAX_COMPARE} flats</span>
         </p>
         <div className="hidden items-center gap-1.5 sm:flex">
           {ids.map((id, index) => (
@@ -32,7 +32,7 @@ export const CompareTray = () => {
               <button
                 type="button"
                 onClick={() => remove(id)}
-                className="ml-1 text-slate-400 hover:text-white"
+                className="ml-1 text-slate-500 hover:text-white"
                 aria-label={`Remove flat ${index + 1} from comparison`}
               >
                 <X className="inline size-3" aria-hidden="true" />

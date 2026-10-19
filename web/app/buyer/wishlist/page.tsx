@@ -1,5 +1,3 @@
-import { Heart } from 'lucide-react';
-
 import { DashboardShell, RequireRole } from '@/components/layout/DashboardShell';
 import { WishlistGrid } from '@/components/dashboards/WishlistGrid';
 
@@ -26,7 +24,14 @@ export default function BuyerWishlistPage() {
           { href: '/buyer/profile', label: 'Profile' },
         ]}
       >
-        <WishlistGrid icon={Heart} />
+        {/*
+          * No `icon` prop: a Lucide icon is a function, and this page is a
+          * server component. Passing it into the client `WishlistGrid` made
+          * Next throw "Functions cannot be passed directly to Client
+          * Components" on every request, so /buyer/wishlist hung instead of
+          * rendering. The `wishlist` preset picks the Heart icon instead.
+          */}
+        <WishlistGrid />
       </DashboardShell>
     </RequireRole>
   );

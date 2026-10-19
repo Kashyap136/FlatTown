@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
-import { Compass, Inbox, RefreshCw, SearchX } from 'lucide-react';
+import { Compass, Heart, Inbox, RefreshCw, SearchX } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,7 @@ const EMPTY_PRESETS = {
   },
   bookings: { icon: Inbox, title: "You don't have any bookings yet", body: 'Browse the marketplace and reserve a flat to get started.' },
   visits: { icon: Compass, title: "You don't have any scheduled site visits", body: 'Open a flat and request a visit slot that suits you.' },
-  wishlist: { icon: Compass, title: 'No saved flats yet', body: 'Tap the heart on any flat to keep it here for later.' },
+  wishlist: { icon: Heart, title: 'No saved flats yet', body: 'Tap the heart on any flat to keep it here for later.' },
   projects: { icon: Compass, title: 'No projects yet', body: 'Add your first project to start listing flats.' },
   flatsToList: { icon: Compass, title: 'No flats listed yet', body: 'Add a flat to one of your projects to start receiving inquiries.' },
   generic: { icon: SearchX, title: 'Nothing here yet', body: 'Once there is data it will appear here.' },
@@ -29,6 +29,12 @@ export type EmptyPreset = keyof typeof EMPTY_PRESETS;
  *
  * `action` is a label + href so the state is always recoverable rather than a
  * dead end.
+ *
+ * `headingLevel` deliberately defaults to undefined, which renders the title as
+ * a paragraph. This state is reused on pages whose surrounding headings start
+ * at different levels; a hardcoded `<h3>` produced h1 -> h3 skips (axe
+ * heading-order) wherever it appeared before the page's first h2. Callers that
+ * genuinely want a section heading opt in explicitly.
  */
 export const EmptyState = ({
   preset = 'generic',
@@ -40,6 +46,7 @@ export const EmptyState = ({
   icon: Icon,
   className,
   compact = false,
+  headingLevel,
 }: {
   preset?: EmptyPreset;
   title?: string;
@@ -50,9 +57,12 @@ export const EmptyState = ({
   icon?: LucideIcon;
   className?: string;
   compact?: boolean;
+  headingLevel?: 'h2' | 'h3' | 'h4';
 }) => {
   const defaults = EMPTY_PRESETS[preset];
   const ResolvedIcon = Icon ?? defaults.icon;
+  const titleText = title ?? defaults.title;
+  const TitleTag = (headingLevel ?? 'p') as 'h2' | 'h3' | 'h4' | 'p';
   return (
     <div
       className={cn(
@@ -64,7 +74,7 @@ export const EmptyState = ({
       <span className="mb-3 rounded-full bg-white p-3 text-slate-400 shadow-sm">
         <ResolvedIcon className="size-6" aria-hidden="true" />
       </span>
-      <h3 className="text-base font-semibold text-slate-900">{title ?? defaults.title}</h3>
+      <TitleTag className="text-base font-semibold text-slate-900">{titleText}</TitleTag>
       <p className="mt-1 max-w-md text-sm text-slate-600">{body ?? defaults.body}</p>
       {actionHref && actionLabel ? (
         <Button asChild variant="primary" size="sm" className="mt-4">

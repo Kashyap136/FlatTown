@@ -14,23 +14,8 @@ import { ListSkeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAdminActions, useDisputes } from '@/hooks/useFlats';
 import { formatDateTime } from '@/lib/price';
+import type { Dispute } from '@/lib/types';
 import { errorMessage } from '@/lib/utils';
-
-interface Dispute {
-  _id?: string;
-  id?: string;
-  subject: string;
-  description: string;
-  category: string;
-  status: string;
-  resolution?: string;
-  createdAt: string;
-  updatedAt?: string;
-  raisedByRole?: string;
-  bookingId?: string;
-  flatId?: string;
-  siteVisitId?: string;
-}
 
 const TABS = [
   { key: 'open', label: 'Open' },
@@ -52,7 +37,9 @@ export const DisputeCenter = () => {
 
   if (isLoading) return <ListSkeleton rows={3} />;
 
-  const all = (data ?? []) as Dispute[];
+  // `useDisputes` already unwraps the response envelope, so `data` is a real
+  // `Dispute[]` — the old cast to Dispute[] was masking an object here.
+  const all = data ?? [];
 
   const act = async (dispute: Dispute, status: 'resolved' | 'rejected') => {
     const key = dispute._id ?? dispute.id ?? '';

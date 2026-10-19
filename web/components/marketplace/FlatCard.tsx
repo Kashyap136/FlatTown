@@ -114,7 +114,7 @@ export const FlatCard = ({ flat, mode = 'default', className, priority = false }
               </Link>
             </h3>
             <p className="mt-1 flex items-center gap-1 truncate text-xs text-slate-600">
-              <MapPin className="size-3 shrink-0 text-slate-400" aria-hidden="true" />
+              <MapPin className="size-3 shrink-0 text-slate-500" aria-hidden="true" />
               <span className="truncate">{locationLabel(flat)}</span>
             </p>
           </div>
@@ -127,7 +127,7 @@ export const FlatCard = ({ flat, mode = 'default', className, priority = false }
 
         <dl className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-xs text-slate-600">
           <div className="flex items-center gap-1">
-            <Building className="size-3 text-slate-400" aria-hidden="true" />
+            <Building className="size-3 text-slate-500" aria-hidden="true" />
             <dt className="sr-only">Configuration</dt>
             <dd className="font-medium text-slate-800">
               {flat.bhk} BHK
@@ -135,22 +135,22 @@ export const FlatCard = ({ flat, mode = 'default', className, priority = false }
             </dd>
           </div>
           <div className="flex items-center gap-1">
-            <Maximize2 className="size-3 text-slate-400" aria-hidden="true" />
+            <Maximize2 className="size-3 text-slate-500" aria-hidden="true" />
             <dt className="sr-only">Carpet area</dt>
             <dd>{formatArea(flat.sizeSqft)}</dd>
           </div>
           <div className="flex items-center gap-1">
-            <Layers className="size-3 text-slate-400" aria-hidden="true" />
+            <Layers className="size-3 text-slate-500" aria-hidden="true" />
             <dt className="sr-only">Floor</dt>
             <dd>{flat.floor === 0 ? 'Ground' : `Floor ${flat.floor}`}</dd>
           </div>
           <div className="flex items-center gap-1">
-            <Scale className="size-3 text-slate-400" aria-hidden="true" />
+            <Scale className="size-3 text-slate-500" aria-hidden="true" />
             <dt className="sr-only">Price per square foot</dt>
             <dd>{formatRate(flat.pricePerSqft)}</dd>
           </div>
           <div className="flex items-center gap-1">
-            <CalendarClock className="size-3 text-slate-400" aria-hidden="true" />
+            <CalendarClock className="size-3 text-slate-500" aria-hidden="true" />
             <dt className="sr-only">Possession</dt>
             <dd>{formatPossession(flat.possessionDate)}</dd>
           </div>
@@ -172,7 +172,7 @@ export const FlatCard = ({ flat, mode = 'default', className, priority = false }
             <RatingStars value={flat.builder.rating.avg} count={flat.builder.rating.count} size="sm" />
           ) : null}
           {typeof flat.views === 'number' ? (
-            <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
+            <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
               <Eye className="size-3" aria-hidden="true" />
               {flat.views}
             </span>
