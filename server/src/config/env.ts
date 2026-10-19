@@ -11,6 +11,16 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config();
 
+// The Cloudinary SDK reads `process.env.CLOUDINARY_URL` while its module is
+// being loaded and throws `Invalid CLOUDINARY_URL protocol` when the value is
+// malformed (e.g. a placeholder or a bare cloud name). Sanitise it here, before
+// any module imports the SDK, so a bad value degrades to "unconfigured"
+// instead of crashing the whole process at boot.
+const rawCloudinaryUrl = (process.env.CLOUDINARY_URL ?? '').trim();
+if (rawCloudinaryUrl && !rawCloudinaryUrl.startsWith('cloudinary://')) {
+  delete process.env.CLOUDINARY_URL;
+}
+
 const num = (value: string | undefined, fallback: number): number => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -108,6 +118,9 @@ export const env = {
 
   // Storage
   cloudinaryUrl: process.env.CLOUDINARY_URL ?? '',
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY ?? '',
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
   awsRegion: process.env.AWS_REGION ?? '',
   awsBucket: process.env.AWS_BUCKET_NAME ?? '',
   awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
@@ -152,8 +165,42 @@ export const hasLiveRazorpay = (): boolean =>
   !isPlaceholder(env.razorpayKeyId) && !isPlaceholder(env.razorpayKeySecret) && env.razorpayKeyId.length > 5;
 
 /** True when a real Cloudinary account is configured. */
-export const hasCloudinary = (): boolean =>
-  env.cloudinaryUrl.length > 0 && !env.cloudinaryUrl.includes('key:secret@');
+export const hasCloudinary = (): boolean => {
+  if (env.cloudinaryUrl) {
+    return (
+      env.cloudinaryUrl.startsWith('cloudinary://') &&
+      !env.cloudinaryUrl.includes('key:secret@')
+    );
+  }
+  return (
+    env.cloudinaryCloudName.length > 0 &&
+    env.cloudinaryApiKey.length > 0 &&
+    env.cloudinaryApiSecret.length > 0
+  );
+};
+
+/**
+ * Returns the configuration object to pass to `cloudinary.config()`, or `null`
+ * when Cloudinary is not configured.
+ *
+ * Precedence: `CLOUDINARY_URL` wins when both forms are supplied. This keeps a
+ * single source of truth and avoids constructing a malformed URL from
+ * unescaped values.
+ */
+export const cloudinaryConfig = (): Record<string, unknown> | null => {
+  if (env.cloudinaryUrl) {
+    return { secure: true, url: env.cloudinaryUrl };
+  }
+  if (env.cloudinaryCloudName && env.cloudinaryApiKey && env.cloudinaryApiSecret) {
+    return {
+      secure: true,
+      cloud_name: env.cloudinaryCloudName,
+      api_key: env.cloudinaryApiKey,
+      api_secret: env.cloudinaryApiSecret,
+    };
+  }
+  return null;
+};
 
 /** True when the JWT signing key is missing, known-insecure or a placeholder. */
 export const isInsecureJwt = (): boolean =>

@@ -1,8 +1,8 @@
+import { env, hasCloudinary, cloudinaryConfig } from '../config/env';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { env, hasCloudinary } from '../config/env';
 import { ApiError } from './ApiError';
 import { detectFileType, safeStoredName, type DetectedFile, type DetectedKind } from './fileSniff';
 
@@ -23,10 +23,8 @@ let configured = false;
 const configureCloudinary = (): boolean => {
   if (!hasCloudinary()) return false;
   if (!configured) {
-    cloudinary.config({
-      secure: true,
-      url: env.cloudinaryUrl,
-    });
+    const cfg = cloudinaryConfig();
+    if (cfg) cloudinary.config(cfg);
     configured = true;
   }
   return true;
@@ -121,7 +119,9 @@ export const uploadBuffer = async (
   }
 
   if (env.isProd) {
-    throw ApiError.internal('File storage is not configured (set CLOUDINARY_URL)');
+    throw ApiError.internal(
+      'File storage is not configured (set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET)',
+    );
   }
 
   return storeLocally(

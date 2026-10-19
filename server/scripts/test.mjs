@@ -33,6 +33,7 @@ const args = [
   ...passthrough,
   'test/admin.test.ts',
   'test/auth.test.ts',
+  'test/cloudinary-config.test.ts',
   'test/booking.test.ts',
   'test/discovery.test.ts',
   'test/pricing.test.ts',
