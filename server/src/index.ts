@@ -15,25 +15,37 @@ const bootstrap = async (): Promise<void> => {
     // Fail fast rather than serve traffic with a forgeable signing key.
     assertProductionEnv();
     if (placeholderFlags.jwt || placeholderFlags.jwtRefresh) {
-      log.warn('JWT_SECRET / JWT_REFRESH_SECRET are using insecure defaults — set real values before deploying.');
+      log.warn('JWT_SECRET / JWT_REFRESH_SECRET are using insecure defaults - set real values before deploying.');
     }
     await connectDatabase();
     await loadPlatformConfig();
-    await initRedis();
 
     const app = createApp();
-    const server = app.listen(env.port, () => {
+    // Bind explicitly to 0.0.0.0 so the platform (Render) can detect and reach
+    // the service. Redis is NOT on the critical path for opening the port: a
+    // slow/unreachable Redis must not delay or prevent the HTTP listener from
+    // starting. It is initialised afterwards (best effort).
+    const server = app.listen(env.port, '0.0.0.0', () => {
       const payments = gatewayInfo();
       const banner = [
         '',
         '  FLAT TOWN API',
-        `  -> http://localhost:${env.port}${env.apiPrefix}`,
+        `  -> http://0.0.0.0:${env.port}${env.apiPrefix}`,
         `  -> env: ${env.nodeEnv}`,
         `  -> payments: ${payments.gateway}${payments.mockEnabled ? ' (SIMULATED - not real money)' : ''}`,
         `  -> storage: ${storageMode()}`,
         '',
       ].join('\n');
       log.info(banner);
+    });
+
+    server.on('error', (error: Error) => {
+      log.error('HTTP server failed to start', error);
+      process.exit(1);
+    });
+
+    void initRedis().catch((error) => {
+      log.warn('Redis initialisation failed; continuing without cache', error);
     });
 
     const shutdown = async (signal: string): Promise<void> => {
